@@ -6,13 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// เก็บผู้เล่น
-let players = {
-    X: null,
-    O: null
-};
-
-// เก็บ user
+let players = { X: null, O: null };
 let users = {};
 let board = Array(9).fill("");
 let currentTurn = "X";
@@ -33,8 +27,6 @@ function checkWinner() {
 }
 
 io.on("connection", (socket) => {
-    console.log("Connected:", socket.id);
-
     socket.on("join", (name) => {
         users[socket.id] = { name, role: "spectator" };
         io.emit("lobby", users);
@@ -73,14 +65,12 @@ io.on("connection", (socket) => {
         if (winner) {
             io.emit("gameOver", winner);
 
-            // รีเซ็ต
             board = Array(9).fill("");
             currentTurn = "X";
 
             setTimeout(() => {
                 io.emit("update", { board, currentTurn });
             }, 1000);
-
         } else {
             currentTurn = currentTurn === "X" ? "O" : "X";
             io.emit("update", { board, currentTurn });
@@ -104,9 +94,5 @@ io.on("connection", (socket) => {
 
 app.use(express.static("public"));
 
-// 🔥 สำคัญสำหรับ deploy
 const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-    console.log("Server running");
-});
+server.listen(PORT, () => console.log("Server running"));
