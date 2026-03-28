@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic Tac Toe Online</title>
+    <style>
+        body { font-family: Arial; display: flex; }
+        .left { margin-right: 40px; }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            font-size: 2em;
+            text-align: center;
+            line-height: 100px;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="left">
+    <h2>เข้าสู่เกม</h2>
+    <input id="name" placeholder="ใส่ชื่อ">
+    <button onclick="join()">เข้าเกม</button>
+
+    <h3 id="status"></h3>
+
+    <button onclick="bePlayer()">เป็นผู้เล่น</button>
+    <button onclick="beSpectator()">เป็นผู้ชม</button>
+    <button onclick="resetGame()">รีเซ็ต</button>
+
+    <div class="board" id="board"></div>
+</div>
+
+<div>
+    <h2>Lobby</h2>
+    <ul id="lobby"></ul>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+const boardDiv = document.getElementById("board");
+const lobbyDiv = document.getElementById("lobby");
+const statusText = document.getElementById("status");
+
+let myRole = "spectator";
+let board = [];
+let gameActive = false;
+
+// สร้างช่อง
+for (let i = 0; i < 9; i++) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+
+    cell.onclick = () => {
+        socket.emit("move", i);
+    };
+
+    boardDiv.appendChild(cell);
+}
+
+// join
+function join() {
+    const name = document.getElementById("name").value;
+    socket.emit("join", name);
+}
+
+// เป็น player
+function bePlayer() {
+    socket.emit("bePlayer");
+}
+
+// เป็น spectator
+function beSpectator() {
+    socket.emit("beSpectator");
+}
+
+// reset
+function resetGame() {
+    socket.emit("reset");
+    gameActive = false;
+    statusText.textContent = "";
+}
+
+// lobby
+socket.on("lobby", (users) => {
+    lobbyDiv.innerHTML = "";
+
+    for (let id in users) {
+        const li = document.createElement("li");
+        li.textContent = users[id].name + " (" + users[id].role + ")";
+        lobbyDiv.appendChild(li);
+
+        if (id === socket.id) {
+            myRole = users[id].role;
+        }
+    }
+});
+
+// update เกม
+socket.on("update", (data) => {
+    board = data.board;
+
+    document.querySelectorAll(".cell").forEach((cell, i) => {
+        cell.textContent = board[i];
+    });
+
+    // เริ่มเกมเมื่อมีการเดิน
+    if (board.some(cell => cell !== "")) {
+        gameActive = true;
+    }
+
+    // แสดงตาเฉพาะตอนเล่น
+    if (gameActive) {
+        statusText.textContent = "ตา: " + data.currentTurn;
+    } else {
+        statusText.textContent = "";
+    }
+});
+
+// ผู้ชนะ
+socket.on("gameOver", (winner) => {
+    alert("ผู้ชนะคือ " + winner);
+
+    gameActive = false;
+    statusText.textContent = "";
+});
+</script>
+
+</body>
+</html>
