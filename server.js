@@ -27,6 +27,7 @@ function checkWinner() {
 }
 
 io.on("connection", (socket) => {
+
     socket.on("join", (name) => {
         users[socket.id] = { name, role: "spectator" };
         io.emit("lobby", users);
@@ -63,14 +64,23 @@ io.on("connection", (socket) => {
         const winner = checkWinner();
 
         if (winner) {
-            io.emit("gameOver", winner);
+            // 🔥 1. ส่งกระดานล่าสุดก่อน
+            io.emit("update", { board, currentTurn });
 
-            board = Array(9).fill("");
-            currentTurn = "X";
-
+            // 🔥 2. หน่วงให้ render
             setTimeout(() => {
-                io.emit("update", { board, currentTurn });
-            }, 1000);
+                io.emit("gameOver", winner);
+
+                // 🔥 3. รีเซ็ต
+                board = Array(9).fill("");
+                currentTurn = "X";
+
+                setTimeout(() => {
+                    io.emit("update", { board, currentTurn });
+                }, 500);
+
+            }, 300);
+
         } else {
             currentTurn = currentTurn === "X" ? "O" : "X";
             io.emit("update", { board, currentTurn });

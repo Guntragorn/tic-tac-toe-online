@@ -39,7 +39,7 @@
             font-size: 2em;
             text-align: center;
             line-height: 100px;
-            border: 2px solid white; /* 🔥 แก้ให้เห็นชัด */
+            border: 2px solid white;
             cursor: pointer;
         }
 
@@ -49,11 +49,11 @@
 
         input {
             background: black;
-            color: white;            /* 🔥 แก้ปัญหาชื่อหาย */
+            color: white;
             border: 1px solid white;
             padding: 5px 10px;
             margin: 5px;
-            caret-color: white;      /* 🔥 cursor ขาว */
+            caret-color: white;
         }
 
         button {
@@ -86,7 +86,6 @@
 
 <div class="container">
 
-    <!-- เกม -->
     <div class="game">
         <h2>Tic Tac Toe</h2>
 
@@ -102,7 +101,6 @@
         <div class="board" id="board"></div>
     </div>
 
-    <!-- Lobby -->
     <div class="lobby">
         <h3>Lobby</h3>
         <ul id="lobby"></ul>
@@ -140,7 +138,6 @@ function join() {
     socket.emit("join", name);
 }
 
-// roles
 function bePlayer() {
     socket.emit("bePlayer");
 }
@@ -149,14 +146,12 @@ function beSpectator() {
     socket.emit("beSpectator");
 }
 
-// reset
 function resetGame() {
     socket.emit("reset");
     gameActive = false;
     statusText.textContent = "";
 }
 
-// lobby
 socket.on("lobby", (users) => {
     lobbyDiv.innerHTML = "";
 
@@ -171,7 +166,6 @@ socket.on("lobby", (users) => {
     }
 });
 
-// update เกม
 socket.on("update", (data) => {
     board = data.board;
 
@@ -186,7 +180,6 @@ socket.on("update", (data) => {
     statusText.textContent = gameActive ? "ตา: " + data.currentTurn : "";
 });
 
-// ผู้ชนะ
 socket.on("gameOver", (winner) => {
     alert("ผู้ชนะคือ " + winner);
 
@@ -196,4 +189,4 @@ socket.on("gameOver", (winner) => {
 </script>
 
 </body>
-</html>
+</html> 
