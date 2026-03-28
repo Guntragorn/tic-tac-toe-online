@@ -1,37 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tic Tac Toe Dark</title>
+    <title>Tic Tac Toe Online</title>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background-color: black;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            display: flex;
-            width: 90%;
-            max-width: 1000px;
-        }
-
-        /* ฝั่งเกม */
-        .game {
-            flex: 1;
-            text-align: center;
-        }
+        body { font-family: Arial; display: flex; }
+        .left { margin-right: 40px; }
 
         .board {
             display: grid;
             grid-template-columns: repeat(3, 100px);
             gap: 5px;
-            justify-content: center;
-            margin-top: 20px;
         }
 
         .cell {
@@ -40,57 +18,30 @@
             font-size: 2em;
             text-align: center;
             line-height: 100px;
-            border: 1px solid white;
+            border: 1px solid black;
             cursor: pointer;
-        }
-
-        input, button {
-            background: black;
-            color: white;
-            border: 1px solid white;
-            padding: 5px 10px;
-            margin: 5px;
-        }
-
-        /* ฝั่ง lobby */
-        .lobby {
-            width: 250px;
-            border-left: 1px solid white;
-            padding-left: 20px;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="left">
+    <h2>เข้าสู่เกม</h2>
+    <input id="name" placeholder="ใส่ชื่อ">
+    <button onclick="join()">เข้าเกม</button>
 
-    <!-- ฝั่งเกม -->
-    <div class="game">
-        <h2>Tic Tac Toe</h2>
+    <h3 id="status"></h3>
 
-        <input id="name" placeholder="ใส่ชื่อ">
-        <button onclick="join()">เข้าเกม</button>
+    <button onclick="bePlayer()">เป็นผู้เล่น</button>
+    <button onclick="beSpectator()">เป็นผู้ชม</button>
+    <button onclick="resetGame()">รีเซ็ต</button>
 
-        <h3 id="status"></h3>
+    <div class="board" id="board"></div>
+</div>
 
-        <button onclick="bePlayer()">เป็นผู้เล่น</button>
-        <button onclick="beSpectator()">เป็นผู้ชม</button>
-        <button onclick="resetGame()">รีเซ็ต</button>
-
-        <div class="board" id="board"></div>
-    </div>
-
-    <!-- ฝั่ง Lobby -->
-    <div class="lobby">
-        <h3>Lobby</h3>
-        <ul id="lobby"></ul>
-    </div>
-
+<div>
+    <h2>Lobby</h2>
+    <ul id="lobby"></ul>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -123,11 +74,12 @@ function join() {
     socket.emit("join", name);
 }
 
-// roles
+// เป็น player
 function bePlayer() {
     socket.emit("bePlayer");
 }
 
+// เป็น spectator
 function beSpectator() {
     socket.emit("beSpectator");
 }
@@ -162,10 +114,12 @@ socket.on("update", (data) => {
         cell.textContent = board[i];
     });
 
+    // เริ่มเกมเมื่อมีการเดิน
     if (board.some(cell => cell !== "")) {
         gameActive = true;
     }
 
+    // แสดงตาเฉพาะตอนเล่น
     if (gameActive) {
         statusText.textContent = "ตา: " + data.currentTurn;
     } else {
